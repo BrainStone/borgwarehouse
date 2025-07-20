@@ -52,9 +52,8 @@ case "$SSH_ORIGINAL_COMMAND" in
 				exec borg serve "${appendOnlyMode[@]}" --restrict-to-path "${repositoryPath}" --storage-quota "$quota"G
 				;;
 		'rsync --server '*)
-				# shellcheck disable=SC2206
 				# We really want perform shell splitting, because the command is properly escaped
-				rsync_command=($SSH_ORIGINAL_COMMAND)
+				eval "rsync_command=($SSH_ORIGINAL_COMMAND)"
 				if [[ "${rsync_command[-1]}" != "./${repositoryName}" && "${rsync_command[-1]}" != "./${repositoryName}/"* ]]; then
 						echo "Trying to access restricted path." >&2
 						echo "Only ./${repositoryName} is available" >&2
