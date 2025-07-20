@@ -54,12 +54,15 @@ case "$SSH_ORIGINAL_COMMAND" in
 'rsync --server '*)
     # We really want perform shell splitting, because the command is properly escaped
     eval "rsync_command=($SSH_ORIGINAL_COMMAND)"
+
+    # Check if the path starts with `./$repositoryName` (just this path or a path starting with this)
     if [[ "${rsync_command[-1]}" != "./${repositoryName}" && "${rsync_command[-1]}" != "./${repositoryName}/"* ]]; then
         echo "Trying to access restricted path." >&2
         echo "Only ./${repositoryName} is available" >&2
         exit 1
     fi
 
+    # Remove the `/$repositoryName` component, because rrsync interprets the paths relative to the restricted path
     rsync_command[-1]="${rsync_command[-1]/\/$repositoryName/}"
     SSH_ORIGINAL_COMMAND="$(printf '%q ' "${rsync_command[@]}")"
     export SSH_ORIGINAL_COMMAND="${SSH_ORIGINAL_COMMAND% }"
