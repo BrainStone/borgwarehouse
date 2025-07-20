@@ -5,6 +5,17 @@
 # command used is either a borg command or a rsync command and apply the restrictions passed via command line.
 # This shell script takes 4 arguments: [poolDirectory] [repositoryName] [quota] [append-only mode (boolean)]
 
+if [[ "$1" == "--debug" ]]; then
+		shift
+		exec 19>>/home/borgwarehouse/connectionMultiplexer.log
+		BASH_XTRACEFD=19
+
+		echo >&19
+		export >&19
+		echo >&19
+		set -x
+fi
+
 # Check args
 if [ "$1" == "" ] || [ "$2" == "" ] || [ "$3" == "" ] || ! [[ "$3" =~ ^[0-9]+$ ]] || [ "$4" != "true" ] && [ "$4" != "false" ]; then
     echo -n "This shell takes 4 arguments: [poolDirectory] [repositoryName] [quota] [append-only mode (boolean)]" >&2
@@ -24,8 +35,8 @@ fi
 repositoryPath="${pool}/${repositoryName}"
 
 if [[ ! -d "${repositoryPath}" ]]; then
-	echo "Repository doesn't exist" >&2
-	exit 3
+	  echo "Repository doesn't exist" >&2
+	  exit 3
 fi
 
 # Append only mode
@@ -36,15 +47,15 @@ else
 fi
 
 case "$SSH_ORIGINAL_COMMAND" in
-  'borg serve'|'borg serve '*)
-  	cd "${pool}" || exit
-  	exec borg serve "${appendOnlyMode[@]}" --restrict-to-path "${repositoryPath}" --storage-quota "$quota"G
-  	;;
-  'rsync --server '*)
-  	exec rrsync "${repositoryPath}"
-  	;;
-  *)
-  	echo "Unsupported command" >&2
-  	exit 1
-  	;;
+    'borg serve'|'borg serve '*)
+  			cd "${pool}" || exit
+				exec borg serve "${appendOnlyMode[@]}" --restrict-to-path "${repositoryPath}" --storage-quota "$quota"G
+				;;
+		'rsync --server '*)
+				exec rrsync "${repositoryPath}"
+				;;
+		*)
+				echo "Unsupported command" >&2
+				exit 1
+				;;
 esac

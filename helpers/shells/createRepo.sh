@@ -59,8 +59,8 @@ fi
 
 # Check if borgbackup is installed
 if ! [ -x "$(command -v borg)" ]; then
-  echo -n "You must install borgbackup package." >&2
-  exit 4
+		echo -n "You must install borgbackup package." >&2
+		exit 4
 fi
 
 # Generation of a random name for repository
