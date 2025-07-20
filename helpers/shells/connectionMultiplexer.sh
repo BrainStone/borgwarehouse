@@ -36,12 +36,12 @@ else
 fi
 
 case "$SSH_ORIGINAL_COMMAND" in
-  'borg serve '*)
+  'borg serve'|'borg serve '*)
   	cd "${pool}" || exit
   	exec borg serve "${appendOnlyMode[@]}" --restrict-to-path "${repositoryPath}" --storage-quota "$quota"G
   	;;
   'rsync --server '*)
-  	exec /usr/bin/rrsync "${repositoryPath}"
+  	exec rrsync "${repositoryPath}"
   	;;
   *)
   	echo "Unsupported command" >&2
