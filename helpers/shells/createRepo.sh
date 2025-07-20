@@ -1,19 +1,19 @@
 #!/usr/bin/env bash
 
-# Shell created by Raven for BorgWarehouse.
-# This shell takes 2 arguments : [SSH pub key] X [quota] x [append only mode (boolean)]
-# Main steps are :
+# Shell script created by Raven for BorgWarehouse.
+# This shell script takes 3 arguments: [SSH pub key], [quota], and [append only mode (boolean)]
+# Main steps are:
 # - check if args are present
-# - check the ssh pub key format
-# - check if the ssh pub key is already present in authorized_keys
-# - check if borgbackup package is install
+# - check the SSH pub key format
+# - check if the SSH pub key is already present in authorized_keys
+# - check if borgbackup package is installed
 # - generate a random repositoryName
-# - add the SSH public key in the authorized_keys with borg restriction for repository and storage quota.
+# - add the SSH public key to the authorized_keys with borg restriction for repository and storage quota.
 # This simple method prevents the user from connecting to the server with a shell in SSH.
-# He can only use the borg command. Moreover, he will not be able to leave his repository or create a new one.
+# The user can only use the borg command. Moreover, they will not be able to leave their repository or create a new one.
 # It is similar to a jail and that is the goal.
 
-# Limitation : all SSH pubkey are unique : https://github.com/borgbackup/borg/issues/7757
+# Limitation: all SSH pubkeys are unique: https://github.com/borgbackup/borg/issues/7757
 
 # Exit when any command fails
 set -e
@@ -32,12 +32,12 @@ authorized_keys="${home}/.ssh/authorized_keys"
 
 # Check args
 if [ "$1" == "" ] || [ "$2" == "" ] || ! [[ "$2" =~ ^[0-9]+$ ]] || [ "$3" != "true" ] && [ "$3" != "false" ]; then
-    echo -n "This shell takes 3 arguments : SSH Public Key, Quota in Go [e.g. : 10], Append only mode [true|false]" >&2
+    echo -n "This shell takes 3 arguments: SSH Public Key, Quota in GB [e.g.: 10], Append only mode [true|false]" >&2
     exit 1
 fi
 
 # Check if the SSH public key is a valid format
-# This pattern validates SSH public keys for : rsa, ed25519, ed25519-sk
+# This pattern validates SSH public keys for: rsa, ed25519, ed25519-sk
 pattern='(ssh-ed25519 AAAAC3NzaC1lZDI1NTE5|sk-ssh-ed25519@openssh.com AAAAGnNrLXNzaC1lZDI1NTE5QG9wZW5zc2guY29t|ssh-rsa AAAAB3NzaC1yc2)[0-9A-Za-z+/]+[=]{0,3}(\s.*)?'
 if [[ ! "$1" =~ $pattern ]]
 then
@@ -63,7 +63,7 @@ if ! [ -x "$(command -v borg)" ]; then
   exit 4
 fi
 
-# Generation of a random for repositoryName
+# Generation of a random name for repository
 randRepositoryName () {
     openssl rand -hex 4
 }
@@ -76,7 +76,7 @@ else
     appendOnlyMode=""
 fi
 
-## Add ssh public key in authorized_keys with borg restriction for only 1 repository and storage quota
+## Add SSH public key to authorized_keys with borg restriction for only 1 repository and storage quota
 restricted_authkeys="command=\"cd ${pool};borg serve${appendOnlyMode} --restrict-to-path ${pool}/${repositoryName} --storage-quota $2G\",restrict $1"
 echo "$restricted_authkeys" | tee -a "${authorized_keys}" >/dev/null
 

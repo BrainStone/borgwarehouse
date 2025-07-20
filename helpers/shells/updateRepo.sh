@@ -2,9 +2,9 @@
 
 ### DEPRECATED ### NodeJS will handle this in the future.
 
-# Shell created by Raven for BorgWarehouse.
-# This shell takes 4 args: [repositoryName] [new SSH pub key] [quota] [append-only mode (boolean)]
-# This shell updates the SSH key and the quota for a repository.
+# Shell script created by Raven for BorgWarehouse.
+# This shell script takes 4 args: [repositoryName] [new SSH pub key] [quota] [append-only mode (boolean)]
+# This shell script updates the SSH key and the quota for a repository.
 
 # Exit when any command fails
 set -e
@@ -24,7 +24,7 @@ if [ "$1" == "" ] || [ "$2" == "" ] || [ "$3" == "" ] || [ "$4" != "true" ] && [
 fi
 
 # Check if the SSH public key is a valid format
-# This pattern validates SSH public keys for : rsa, ed25519, ed25519-sk
+# This pattern validates SSH public keys for: rsa, ed25519, ed25519-sk
 pattern='(ssh-ed25519 AAAAC3NzaC1lZDI1NTE5|sk-ssh-ed25519@openssh.com AAAAGnNrLXNzaC1lZDI1NTE5QG9wZW5zc2guY29t|ssh-rsa AAAAB3NzaC1yc2)[0-9A-Za-z+/]+[=]{0,3}(\s.*)?'
 if [[ ! "$2" =~ $pattern ]]
 then
@@ -32,7 +32,7 @@ then
     exit 2
 fi
 
-# Check if the repositoryName pattern is an hexa 8 char. With createRepo.sh our randoms are hexa of 8 characters.
+# Check if the repositoryName pattern is a hex string of 8 characters. With createRepo.sh our randoms are hex strings of 8 characters.
 # If we receive another pattern there is necessarily a problem.
 repositoryName=$1
 if ! [[ "$repositoryName" =~ ^[a-f0-9]{8}$ ]]; then
@@ -46,14 +46,14 @@ if ! grep -q "command=\".*${repositoryName}.*\",restrict" "$home/.ssh/authorized
     exit 4
 fi
 
-# Check if the new SSH pub key is already present on a line OTHER than the one corresponding to repositoryName
+# Check if the new SSH pub key is already present on a line other than the one corresponding to repositoryName
 found=false
 regex="command=\".*${repositoryName}.*\",restrict"
 while IFS= read -r line; do
     if [[ $line =~ $pattern ]]; then
         # Get the SSH pub key of the line (ignore the comment)
         key1=$(echo "${BASH_REMATCH[0]}" | awk '{print $1 " " $2}')
-        # Get the SSH pub key of the new SSH pub key (ignore the comment)
+        # Get the SSH pub key of the new SSH pub key (ignore the comment)
         key2=$(echo "$2" | awk '{print $1 " " $2}')
         
         if [ "$key1" == "$key2" ]; then

@@ -2,9 +2,10 @@
 
 ### DEPRECATED ### NodeJS will handle this in the future.
 
-# Shell created by Raven for BorgWarehouse.
-# This shell takes 1 arg : [repositoryName] with 8 char. length only.
-# This shell **delete the repository** in arg and **all his data** and the line associated in the authorized_keys file.
+# Shell script created by Raven for BorgWarehouse.
+# This shell script takes 1 arg: [repositoryName] with 8 char. length only.
+# This shell script **deletes the repository** in the arg and **all its data** and the associated line in the
+# authorized_keys file.
 
 # Exit when any command fails
 set -e
@@ -27,7 +28,7 @@ if [[ $# -ne 1 || $1 = "" ]]; then
     exit 1
 fi
 
-# Check if the repositoryName pattern is an hexa 8 char. With createRepo.sh our randoms are hexa of 8 characters.
+# Check if the repositoryName pattern is a hex string of 8 characters. With createRepo.sh our randoms are hex strings of 8 characters.
 # If we receive another pattern there is necessarily a problem.
 repositoryName=$1
 if ! [[ "$repositoryName" =~ ^[a-f0-9]{8}$ ]]; then
@@ -45,5 +46,5 @@ if [ -d "${pool}/${repositoryName}" ]; then
 else
         # Delete the line in the authorized_keys file
         sed -i "/${repositoryName}/d" "${authorized_keys}"
-        echo -n "The folder ""${pool}"/"${repositoryName}"" did not exist (repository never initialized or used). The line associated in the authorized_keys file has been deleted."
+        echo -n "The folder ""${pool}"/"${repositoryName}"" did not exist (repository was never initialized or used). The line associated in the authorized_keys file has been deleted."
 fi
