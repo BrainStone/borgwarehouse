@@ -69,15 +69,11 @@ randRepositoryName () {
 }
 repositoryName=$(randRepositoryName)
 
-# Append only mode
-if [ "$3" == "true" ]; then
-    appendOnlyMode=" --append-only"
-else
-    appendOnlyMode=""
-fi
+# Determine the base dir of this script
+scriptPath="$(realpath "$(dirname "${BASH_SOURCE[0]}")")"
 
 ## Add SSH public key to authorized_keys with borg restriction for only 1 repository and storage quota
-restricted_authkeys="command=\"cd ${pool};borg serve${appendOnlyMode} --restrict-to-path ${pool}/${repositoryName} --storage-quota $2G\",restrict $1"
+restricted_authkeys="command=\"${scriptPath}/connectionMultiplexer.sh ${pool@Q} ${repositoryName} $2 $3\",restrict $1"
 echo "$restricted_authkeys" | tee -a "${authorized_keys}" >/dev/null
 
 ## Return the repositoryName
