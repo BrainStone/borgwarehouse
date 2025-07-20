@@ -41,46 +41,52 @@ POSITIONAL_ARGS=()
 
 # shellcheck disable=SC2221,SC2222
 while [[ $# -gt 0 ]]; do
-  case $1 in
-    -a|--auto-size)
-      _AUTOSIZE=1; shift ;;
-    -*|--*)
-      echo "Unknown option $1"; exit 1 ;;
+    case $1 in
+    -a | --auto-size)
+        _AUTOSIZE=1
+        shift
+        ;;
+    -* | --*)
+        echo "Unknown option $1"
+        exit 1
+        ;;
     *)
-      POSITIONAL_ARGS+=("$1") ; shift ;;
-  esac
+        POSITIONAL_ARGS+=("$1")
+        shift
+        ;;
+    esac
 done
 
 set -- "${POSITIONAL_ARGS[@]}" # restore positional parameters
 
 function __repoSize() {
-  if [ $_AUTOSIZE -eq 1 ]; then
-    _repoSizeBytes=$(du --summarize --bytes "${1}" |
-      grep --perl-regexp --only-matching '^\d+')
-    if [ "$_repoSizeBytes" -le 2147483648 ]; then
-      # Under 2G
-      echo 2
-    else
-      # For more than 2G, the next power of two is determined.
-      _factor=2
-      while true; do
-        _repoSize=$((2**i))
-        if [ 123 -lt $_repoSize ]; then
-          echo $_repoSize
-          break
+    if [ $_AUTOSIZE -eq 1 ]; then
+        _repoSizeBytes=$(du --summarize --bytes "${1}" |
+            grep --perl-regexp --only-matching '^\d+')
+        if [ "$_repoSizeBytes" -le 2147483648 ]; then
+            # Under 2G
+            echo 2
+        else
+            # For more than 2G, the next power of two is determined.
+            _factor=2
+            while true; do
+                _repoSize=$((2 ** i))
+                if [ 123 -lt $_repoSize ]; then
+                    echo $_repoSize
+                    break
+                fi
+                ((i++))
+            done
         fi
-        ((i++))
-      done
+    else
+        echo "2"
     fi
-  else
-    echo "2"
-  fi
 }
 
 finalObject="[]"
 i=0
 # Loop on each directory in bw-data
-for directory in $directoriesList ; do
+for directory in $directoriesList; do
     unixUser=$directory
     repository=$(ls "$bwDataDir/$directory/repos/")
     id=$i
@@ -93,23 +99,23 @@ for directory in $directoriesList ; do
     displayDetails=true
     status=false
     sshPublicKey=$(grep --only-matching --perl-regexp \
-      '(?<=restrict ).*' \
-      "$bwDataDir/$directory/.ssh/authorized_keys")
+        '(?<=restrict ).*' \
+        "$bwDataDir/$directory/.ssh/authorized_keys")
 
     # Create a valid JSON object with jq for each repo
     objRepoJSON=$(jq -n --argjson id $id \
-                        --arg alias "$alias" \
-                        --arg repository "$repository" \
-                        --argjson status $status \
-                        --argjson lastSave $lastSave \
-                        --argjson alert $alert \
-                        --argjson storageSize "$storageSize" \
-                        --argjson storageUsed $storageUsed \
-                        --arg sshPublicKey "$sshPublicKey" \
-                        --arg comment "$comment" \
-                        --argjson displayDetails $displayDetails \
-                        --arg unixUser "$unixUser" \
-                        "{ \
+        --arg alias "$alias" \
+        --arg repository "$repository" \
+        --argjson status $status \
+        --argjson lastSave $lastSave \
+        --argjson alert $alert \
+        --argjson storageSize "$storageSize" \
+        --argjson storageUsed $storageUsed \
+        --arg sshPublicKey "$sshPublicKey" \
+        --arg comment "$comment" \
+        --argjson displayDetails $displayDetails \
+        --arg unixUser "$unixUser" \
+        "{ \
                           id:             \$id,             \
                           alias:          \$alias,          \
                           repository:     \$repository,     \
@@ -125,11 +131,11 @@ for directory in $directoriesList ; do
                         }")
 
     # Insert objRepoJSON in finalObject with jq
-    finalObject=$(jq --argjson objRepoJSON  \
-      "$objRepoJSON" '. += [$objRepoJSON]' \
-      <<< "$finalObject")
+    finalObject=$(jq --argjson objRepoJSON \
+        "$objRepoJSON" '. += [$objRepoJSON]' \
+        <<<"$finalObject")
 
-    i=$((i+1))
+    i=$((i + 1))
 done
 
 #Display finalObject on screen to copy/paste it in repo.json file

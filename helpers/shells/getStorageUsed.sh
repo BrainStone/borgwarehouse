@@ -31,7 +31,7 @@ fi
 cd "${home}"/repos
 output=$(du -s -L -- * 2>/dev/null | awk '{print "{\"size\":" $1 ",\"name\":\"" $2 "\"}"}' | jq -s '.')
 if [ -z "$output" ]; then
-		output="[]"
+    output="[]"
 fi
 
 # Print the JSON output

@@ -6,14 +6,14 @@
 # This shell script takes 4 arguments: [poolDirectory] [repositoryName] [quota] [append-only mode (boolean)]
 
 if [[ "$1" == "--debug" ]]; then
-		shift
-		exec 19>>/home/borgwarehouse/connectionMultiplexer.log
-		BASH_XTRACEFD=19
+    shift
+    exec 19>>/home/borgwarehouse/connectionMultiplexer.log
+    BASH_XTRACEFD=19
 
-		echo >&19
-		export >&19
-		echo >&19
-		set -x
+    echo >&19
+    export >&19
+    echo >&19
+    set -x
 fi
 
 # Check args
@@ -35,8 +35,8 @@ fi
 repositoryPath="${pool}/${repositoryName}"
 
 if [[ ! -d "${repositoryPath}" ]]; then
-	  echo "Repository doesn't exist" >&2
-	  exit 3
+    echo "Repository doesn't exist" >&2
+    exit 3
 fi
 
 # Append only mode
@@ -47,27 +47,27 @@ else
 fi
 
 case "$SSH_ORIGINAL_COMMAND" in
-    'borg serve'|'borg serve '*)
-  			cd "${pool}" || exit
-				exec borg serve "${appendOnlyMode[@]}" --restrict-to-path "${repositoryPath}" --storage-quota "$quota"G
-				;;
-		'rsync --server '*)
-				# We really want perform shell splitting, because the command is properly escaped
-				eval "rsync_command=($SSH_ORIGINAL_COMMAND)"
-				if [[ "${rsync_command[-1]}" != "./${repositoryName}" && "${rsync_command[-1]}" != "./${repositoryName}/"* ]]; then
-						echo "Trying to access restricted path." >&2
-						echo "Only ./${repositoryName} is available" >&2
-						exit 1
-				fi
+'borg serve' | 'borg serve '*)
+    cd "${pool}" || exit
+    exec borg serve "${appendOnlyMode[@]}" --restrict-to-path "${repositoryPath}" --storage-quota "$quota"G
+    ;;
+'rsync --server '*)
+    # We really want perform shell splitting, because the command is properly escaped
+    eval "rsync_command=($SSH_ORIGINAL_COMMAND)"
+    if [[ "${rsync_command[-1]}" != "./${repositoryName}" && "${rsync_command[-1]}" != "./${repositoryName}/"* ]]; then
+        echo "Trying to access restricted path." >&2
+        echo "Only ./${repositoryName} is available" >&2
+        exit 1
+    fi
 
-				rsync_command[-1]="${rsync_command[-1]/\/$repositoryName/}"
-				SSH_ORIGINAL_COMMAND="$(printf '%q ' "${rsync_command[@]}")"
-        export SSH_ORIGINAL_COMMAND="${SSH_ORIGINAL_COMMAND% }"
+    rsync_command[-1]="${rsync_command[-1]/\/$repositoryName/}"
+    SSH_ORIGINAL_COMMAND="$(printf '%q ' "${rsync_command[@]}")"
+    export SSH_ORIGINAL_COMMAND="${SSH_ORIGINAL_COMMAND% }"
 
-				exec rrsync "${repositoryPath}"
-				;;
-		*)
-				echo "Unsupported command" >&2
-				exit 1
-				;;
+    exec rrsync "${repositoryPath}"
+    ;;
+*)
+    echo "Unsupported command" >&2
+    exit 1
+    ;;
 esac

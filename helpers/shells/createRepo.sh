@@ -39,14 +39,13 @@ fi
 # Check if the SSH public key is a valid format
 # This pattern validates SSH public keys for: rsa, ed25519, ed25519-sk
 pattern='(ssh-ed25519 AAAAC3NzaC1lZDI1NTE5|sk-ssh-ed25519@openssh.com AAAAGnNrLXNzaC1lZDI1NTE5QG9wZW5zc2guY29t|ssh-rsa AAAAB3NzaC1yc2)[0-9A-Za-z+/]+[=]{0,3}(\s.*)?'
-if [[ ! "$1" =~ $pattern ]]
-then
+if [[ ! "$1" =~ $pattern ]]; then
     echo -n "Invalid public SSH KEY format. Provide a key in OpenSSH format (rsa, ed25519, ed25519-sk)" >&2
     exit 2
 fi
 
 ## Check if authorized_keys exists
-if [ ! -f "${authorized_keys}" ];then
+if [ ! -f "${authorized_keys}" ]; then
     echo -n "${authorized_keys} must be present" >&2
     exit 5
 fi
@@ -59,12 +58,12 @@ fi
 
 # Check if borgbackup is installed
 if ! [ -x "$(command -v borg)" ]; then
-		echo -n "You must install borgbackup package." >&2
-		exit 4
+    echo -n "You must install borgbackup package." >&2
+    exit 4
 fi
 
 # Generation of a random name for repository
-randRepositoryName () {
+randRepositoryName() {
     openssl rand -hex 4
 }
 repositoryName=$(randRepositoryName)

@@ -30,8 +30,7 @@ fi
 # Check if the SSH public key is a valid format
 # This pattern validates SSH public keys for: rsa, ed25519, ed25519-sk
 pattern='(ssh-ed25519 AAAAC3NzaC1lZDI1NTE5|sk-ssh-ed25519@openssh.com AAAAGnNrLXNzaC1lZDI1NTE5QG9wZW5zc2guY29t|ssh-rsa AAAAB3NzaC1yc2)[0-9A-Za-z+/]+[=]{0,3}(\s.*)?'
-if [[ ! "$2" =~ $pattern ]]
-then
+if [[ ! "$2" =~ $pattern ]]; then
     echo -n "Invalid public SSH KEY format. Provide a key in OpenSSH format (rsa, ed25519, ed25519-sk)" >&2
     exit 2
 fi
@@ -59,7 +58,7 @@ while IFS= read -r line; do
         key1=$(echo "${BASH_REMATCH[0]}" | awk '{print $1 " " $2}')
         # Get the SSH pub key of the new SSH pub key (ignore the comment)
         key2=$(echo "$2" | awk '{print $1 " " $2}')
-        
+
         if [ "$key1" == "$key2" ]; then
             # If the SSH pub key is already present on a line other than the one corresponding to repositoryName
             if [[ ! $line =~ $regex ]]; then
@@ -68,7 +67,7 @@ while IFS= read -r line; do
             fi
         fi
     fi
-done < "$authorized_keys"
+done <"$authorized_keys"
 if [ "$found" = true ]; then
     echo -n "This SSH pub key is already present in authorized_keys on a different line." >&2
     exit 5
