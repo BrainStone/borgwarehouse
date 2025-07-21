@@ -34,9 +34,11 @@ fi
 
 repositoryPath="${pool}/${repositoryName}"
 
-if [[ ! -d "${repositoryPath}" ]]; then
-    echo "Repository doesn't exist" >&2
+if [[ ! -d "${pool}" ]]; then
+    echo "Repository pool exist" >&2
     exit 3
+elif [[ ! -d "${repositoryPath}" ]]; then
+    mkdir -p "${repositoryPath}"
 fi
 
 # Append only mode
